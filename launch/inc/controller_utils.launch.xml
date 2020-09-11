@@ -18,8 +18,8 @@
   <!-- Parameters we share with ur_robot_driver -->
   <arg name="ur_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="3f_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="controllers" default="joint_state_controller pos_joint_traj_controller robotiq_joint_state_controller robotiq_3f_controller"/>
-  <arg name="stopped_controllers" default="ur_joint_group_pos_controller"/>
+  <arg name="controllers" default="joint_state_controller eff_joint_traj_controller robotiq_joint_state_controller robotiq_3f_controller"/>
+  <arg name="stopped_controllers" default="joint_group_eff_controller"/>
 
   <!-- Gazebo parameters -->
   <arg name="debug" default="false" doc="Activates the debug mode."/>
