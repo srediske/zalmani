@@ -52,4 +52,11 @@
       <xacro:insert_block name="flange_hand"/>
   </xacro:robotiq-3f-gripper_articulated>
 
+    <gazebo>
+        <plugin name="ros_control" filename="libgazebo_ros_control.so">
+        <!--robotNamespace>/</robotNamespace-->
+        <!--robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType-->
+        </plugin>
+    </gazebo>
+
 </robot>

@@ -98,11 +98,11 @@
     <param name="tf_prefix" value="$(arg tf_prefix)" />
   </node>
 
-  <!-- Joint state publisher -->
+  <!-- Joint state publisher
   <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
     <param name="publish_frequency" type="double" value="$(arg tf_pub_rate)" />
     <param name="tf_prefix" value="$(arg tf_prefix)" />
-  </node>
+  </node> -->
 
   <!-- Start the 'driver' (ie: Gazebo in this case) and the controller for UR AND Gripper -->
   <include file="$(dirname)/inc/controller_utils.launch.xml">
