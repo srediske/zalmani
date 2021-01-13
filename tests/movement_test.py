@@ -226,17 +226,18 @@ class MoveTopic(object):
 
         MoveTopic.unpause(self)
 
-    def set_pose(self):
+    def set_pose(self, pose=None):
         '''
         This Service allows user to set model joint positions without invoking dynamics.
         '''
+        if pose is None:
+            raise ValueError("No new pose was given")
         MoveTopic.pause(self)
         set_pose = SetModelConfigurationRequest()
         set_pose.model_name = 'robot'
         set_pose.urdf_param_name = ''
         set_pose.joint_names = self.msg_ur.joint_names
-        set_pose.joint_positions = [1.411872641811951, -0.8420041879132294, 1.0565325644929087,
-                                    -1.7859626190435058, -1.5704882948679586, 1.4109012658608595]
+        set_pose.joint_positions = pose
 
         response = self.set_modelconfig(set_pose)
 
