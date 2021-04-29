@@ -1,13 +1,26 @@
 #!/usr/bin/env python3
 
+from typing import List
+
 import actionlib
 import math
 import rospy
 
+from controller_manager_msgs.srv import (SwitchController,
+                                         SwitchControllerRequest,
+                                         SwitchControllerResponse,
+                                         LoadController,
+                                         LoadControllerRequest,
+                                         ListControllers,
+                                         ListControllersRequest,
+                                         ListControllersResponse,
+                                         UnloadController,
+                                         UnloadControllerRequest)
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
 from gazebo_msgs.msg import ODEPhysics
-from gazebo_msgs.srv import SetPhysicsProperties, SetPhysicsPropertiesRequest, SetModelConfiguration, \
-    SetModelConfigurationRequest
+from gazebo_msgs.srv import SetPhysicsProperties, SetPhysicsPropertiesRequest, \
+    SetModelConfiguration, \
+    SetModelConfigurationRequest, DeleteModel, SpawnModel
 from geometry_msgs.msg import Vector3
 from time import time
 from trajectory_msgs.msg import JointTrajectoryPoint, JointTrajectory
@@ -29,8 +42,10 @@ class MoveTopic(object):
         self.rate = rospy.Rate(50)
 
         # Publisher to JointTrajectory robot controller
-        self.ur_pub = rospy.Publisher('/eff_joint_traj_controller/command', JointTrajectory, queue_size=10)
-        self.grip_pub = rospy.Publisher('/robotiq_3f_controller/command', JointTrajectory, queue_size=10)
+        self.ur_pub = rospy.Publisher('/eff_joint_traj_controller/command', JointTrajectory,
+                                      queue_size=10)
+        self.grip_pub = rospy.Publisher('/robotiq_3f_controller/command', JointTrajectory,
+                                        queue_size=10)
 
         # ROS Services
         self.unpause_proxy = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
@@ -38,15 +53,32 @@ class MoveTopic(object):
         self.pause_proxy = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
         self.reset_sim_proxy = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
         self.reset_env_proxy = rospy.ServiceProxy('/gazebo/reset_world', Empty)
-        self.set_physics = rospy.ServiceProxy('/gazebo/set_physics_properties', SetPhysicsProperties)
-        self.set_modelconfig = rospy.ServiceProxy('/gazebo/set_model_configuration', SetModelConfiguration)
+        self.set_physics = rospy.ServiceProxy('/gazebo/set_physics_properties',
+                                              SetPhysicsProperties)
+        self.set_modelconfig = rospy.ServiceProxy('/gazebo/set_model_configuration',
+                                                  SetModelConfiguration)
+        self.spawn_sdf_proxy = rospy.ServiceProxy(
+            '/gazebo/spawn_sdf_model', SpawnModel)
+        self.spawn_urdf_proxy = rospy.ServiceProxy(
+            '/gazebo/spawn_urdf_model', SpawnModel)
+        self.delete_model_proxy = rospy.ServiceProxy(
+            '/gazebo/delete_model', DeleteModel)
+        self.switch_controller_proxy = rospy.ServiceProxy(
+            '/controller_manager/switch_controller', SwitchController)
+        self.unload_controller_proxy = rospy.ServiceProxy(
+            '/controller_manager/unload_controller', UnloadController)
+        self.load_controller_proxy = rospy.ServiceProxy(
+            '/controller_manager/load_controller', LoadController)
+        self.list_controller_proxy = rospy.ServiceProxy(
+            '/controller_manager/list_controllers', ListControllers)
 
         # Initialize fire and forget command for the gripper
         self.msg_grip = JointTrajectory()
         self.msg_grip.header = Header()
         self.msg_grip.joint_names = ['finger_1_joint_1', 'finger_1_joint_2', 'finger_1_joint_3',
                                      'finger_2_joint_1', 'finger_2_joint_2', 'finger_2_joint_3',
-                                     'finger_middle_joint_1', 'finger_middle_joint_2', 'finger_middle_joint_3',
+                                     'finger_middle_joint_1', 'finger_middle_joint_2',
+                                     'finger_middle_joint_3',
                                      'palm_finger_1_joint', 'palm_finger_2_joint']
         self.msg_grip.points = [JointTrajectoryPoint()]
 
@@ -60,6 +92,91 @@ class MoveTopic(object):
         self.ur_zero_pos = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.grip_zero_pos = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         rospy.sleep(0.5)
+
+    def spawn_model(self, model_name, model_path, robot_ns, pose, frame):
+        """
+        TODO: doc
+        """
+        path = self._load_model(model_path)
+
+        if '.sdf' in model_path:
+            rospy.wait_for_service('/gazebo/spawn_sdf_model')
+            try:
+                self.spawn_sdf_proxy(model_name, path, robot_ns, pose, frame)
+            except rospy.ServiceException as e:
+                rospy.logerr(f"Service call failed: {e}")
+        elif '.urdf' in model_path:
+            rospy.wait_for_service('/gazebo/spawn_urdf_model')
+            try:
+                self.spawn_urdf_proxy(model_name, path, robot_ns, pose, frame)
+            except rospy.ServiceException as e:
+                rospy.logerr(f"Service call failed: {e}")
+        elif '.xacro' in model_path:
+            rospy.wait_for_service('/gazebo/spawn_urdf_model')
+            try:
+                self.spawn_urdf_proxy(model_name, path, robot_ns, pose, frame)
+            except rospy.ServiceException as e:
+                rospy.logerr(f"Service call failed: {e}")
+        else:
+            rospy.logerr("Something went wrong: Could not spawn the model")
+
+    def _load_model(self, path):
+        f = open(path, 'r')
+        return f.read()
+
+    def delete_model(self, model_name):
+        rospy.wait_for_service('/gazebo/delete_model')
+        try:
+            self.delete_model_proxy(model_name)
+            rospy.logdebug("Model successfully removed")
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
+
+    def switch_controller(self,
+                          start_controllers: List[str] = None,
+                          stop_controllers: List[str] = None,
+                          strictness: int = 2):
+        """doc"""
+        rospy.wait_for_service('/controller_manager/switch_controller')
+        req = SwitchControllerRequest(
+            start_controllers=start_controllers,
+            stop_controllers=stop_controllers,
+            strictness=strictness)
+        res = SwitchControllerResponse()
+        try:
+            res = self.switch_controller_proxy.call(req)
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
+            print(f"Service call failed: /gazebo/switch_controller with {e}")
+        return res
+
+    def list_controllers(self):
+        rospy.wait_for_service('/controller_manager/list_controllers')
+        res = ListControllersResponse
+        # req = ListControllersRequest()
+        try:
+            res = self.list_controller_proxy()
+        except rospy.ServiceException as e:
+            pass
+        return res
+
+    def unload_controller(self, controller):
+        rospy.wait_for_service('/controller_manager/unload_controller')
+        req = UnloadControllerRequest(name=controller)
+        try:
+            self.unload_controller_proxy(req)
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
+            print(f"Service call failed: /gazebo/unload_controller with {e}")
+
+    def load_controller(self, controller):
+        rospy.wait_for_service('/controller_manager/load_controller')
+        req = LoadControllerRequest(name=controller)
+        try:
+            self.load_controller_proxy(req)
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Service call failed: {e}")
+            print(f"Service call failed: /gazebo/load_controller with {e}")
 
     def open_hand(self):
         pose = self.grip_zero_pos
@@ -80,7 +197,7 @@ class MoveTopic(object):
     def grip_single_joint(self, joint, angle):
         rospy.sleep(1)
         pose = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        pose[joint-1] = angle
+        pose[joint - 1] = angle
         MoveTopic.grip_trajectory_publisher(self, pose=pose)
 
     def grip_sinusoidal(self, joint, sec):
@@ -99,7 +216,7 @@ class MoveTopic(object):
             sine = 0.5861 * math.sin(time()) + 0.6357
         # Joint in the middle
         elif joint in (2, 5, 8):
-            sine = math.pi/4 * math.sin(time()) + math.pi/4
+            sine = math.pi / 4 * math.sin(time()) + math.pi / 4
         # Fingertip joint
         elif joint in (3, 6, 9):
             sine = 0.5847 * math.sin(time()) - 0.637
@@ -110,7 +227,7 @@ class MoveTopic(object):
             sine = 0.1852 * math.sin(time()) - 0.0068
 
         pose = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        pose[joint-1] = sine
+        pose[joint - 1] = sine
         MoveTopic.grip_trajectory_publisher(self, pose=pose)
 
     def grip_trajectory_publisher(self, pose):
@@ -118,7 +235,7 @@ class MoveTopic(object):
         self.msg_grip.points[0].time_from_start = rospy.Duration.from_sec(0.1)
         try:
             self.grip_pub.publish(self.msg_grip)
-            #rospy.sleep(1)
+            # rospy.sleep(1)
             self.rate.sleep()
         except rospy.ROSInterruptException:
             pass
@@ -126,7 +243,7 @@ class MoveTopic(object):
     def ur_single_joint(self, joint, angle):
         rospy.sleep(1)
         pose = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        pose[joint-1] = angle
+        pose[joint - 1] = angle
         MoveTopic.ur_trajectory_publisher(self, pose=pose)
 
     def ur_sinusoidal(self, joint, sec):
@@ -146,12 +263,12 @@ class MoveTopic(object):
             sine = math.sin(time()) - 0.5 * math.pi
 
         pose = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        pose[joint-1] = sine
+        pose[joint - 1] = sine
         MoveTopic.ur_trajectory_publisher(self, pose=pose)
 
     def ur_trajectory_publisher(self, pose):
         self.msg_ur.points[0].positions = pose
-        self.msg_ur.points[0].time_from_start = rospy.Duration.from_sec(0.1)
+        self.msg_ur.points[0].time_from_start = rospy.Duration.from_sec(0.01)
         try:
             self.ur_pub.publish(self.msg_ur)
             self.rate.sleep()
@@ -253,12 +370,15 @@ class MoveAction(object):
         This constructor initialises the different necessary connections to the topics.
         """
         self.rate = rospy.Rate(50)
-        self.grip_client = actionlib.SimpleActionClient('/robotiq_3f_controller/follow_joint_trajectory',
-                                                        FollowJointTrajectoryAction)
+        self.grip_client = actionlib.SimpleActionClient(
+            '/robotiq_3f_controller/follow_joint_trajectory',
+            FollowJointTrajectoryAction)
         self.grip_goal = FollowJointTrajectoryGoal()
         self.grip_goal.trajectory.header = Header()
-        self.grip_goal.trajectory.joint_names = ['finger_1_joint_1', 'finger_1_joint_2', 'finger_1_joint_3',
-                                                 'finger_2_joint_1', 'finger_2_joint_2', 'finger_2_joint_3',
+        self.grip_goal.trajectory.joint_names = ['finger_1_joint_1', 'finger_1_joint_2',
+                                                 'finger_1_joint_3',
+                                                 'finger_2_joint_1', 'finger_2_joint_2',
+                                                 'finger_2_joint_3',
                                                  'finger_middle_joint_1', 'finger_middle_joint_2',
                                                  'finger_middle_joint_3',
                                                  'palm_finger_1_joint', 'palm_finger_2_joint']
@@ -300,52 +420,108 @@ class MoveAction(object):
 
 def main():
     rospy.init_node('robot_control')
-
-    # try:
-    #     ch = MoveAction()
-    #     while not rospy.is_shutdown():
-    #         ch.open_hand()
-    #         ch.close_fist()
-    # except rospy.ROSInterruptException:
-    #     pass
-
-    # try:
-    #     ch = MoveTopic()
-    #     while not rospy.is_shutdown():
-    #         ch.open_hand()
-    #         ch.close_forceps()
-    #         ch.open_hand()
-    #         ch.close_fist()
-    # except rospy.ROSInterruptException:
-    #     pass
-
     ch = MoveTopic()
 
+    urdf = rospy.get_param('/robot_description')
+
+    from geometry_msgs.msg import Pose
+    pose = Pose()
+    pose.position.x = 0.0
+    pose.position.y = 0.0
+    pose.position.z = 0.0001
+
+    # STOP ROS CONTROLLERS
+    controller_list = ["ur_joint_state_controller",
+                       "eff_joint_traj_controller",
+                       "robotiq_joint_state_controller",
+                       "robotiq_3f_controller"]
+    start = time()
+    ch.switch_controller(stop_controllers=controller_list)
+    end = time() - start
+    print(f"Time to stop all controllers (service): {end}")
+    start = time()
+    # UNLOAD ROS CONTROLLERS
+    ch.unload_controller(controller="joint_group_eff_controller")
+    ch.unload_controller(controller="ur_joint_state_controller")
+    ch.unload_controller(controller="eff_joint_traj_controller")
+    ch.unload_controller(controller="robotiq_joint_state_controller")
+    ch.unload_controller(controller="robotiq_3f_controller")
+    end = time() - start
+    print(f"Time to unload all controllers (service): {end}")
+
+    # DELETE THE ROBOT
+    ch.pause()
+    start = time()
+    ch.delete_model(model_name="robot")
+    end = time() - start
+    print(f"Time to delete the robot from gazebo (service): {end}")
+
+    # SPAWN ROBOT
+    rospy.wait_for_service('/gazebo/spawn_urdf_model')
+    try:
+        """
+        "namespace (third behind spawn_urdf_proxy):
+        "" puts the robot name, in this case "robot" in front as a ns:
+        /robot/controller_manager
+        "example" puts "example" in front:
+        /example/controller_manager
+        "/" removes any ns:
+        /controller_manager        
+        """
+        ch.spawn_urdf_proxy("robot", urdf, "/", pose, "world")
+    except rospy.ServiceException as e:
+        rospy.logerr(f"Service call failed: {e}")
+
+    # LOAD ROS CONTROLLERS
+    start = time()
+    ch.load_controller(controller="joint_group_eff_controller")
+    ch.load_controller(controller="ur_joint_state_controller")
+    ch.load_controller(controller="eff_joint_traj_controller")
+    ch.load_controller(controller="robotiq_joint_state_controller")
+    ch.load_controller(controller="robotiq_3f_controller")
+    end = time() - start
+    print(f"Time to load all controllers (service): {end}")
+
+    # START ROS CONTROLLERS
+    ch.unpause()
+    start = time()
+    result = ch.switch_controller(start_controllers=["ur_joint_state_controller",
+                                                     "eff_joint_traj_controller",
+                                                     "robotiq_joint_state_controller",
+                                                     "robotiq_3f_controller"])
+    end = time() - start
+    print(f"Time to start all controllers (service): {end}")
+
+    # SET ROBOT POSE
+    res = ch.list_controllers()
+    print(f"result: {result}")
+    rospy.sleep(0.2)
+    #ch.ur_trajectory_publisher(pose=[1.4, -0.9, 0.7, -1.35, -1.6, 1.4])
+    ch.set_pose(pose=[1.4, -0.9, 0.7, -1.35, -1.6, 1.4])
     # ch.unpause()
-    # ch.close_fist()
-    # ch.close_forceps()
-    # ch.open_forceps()
-    # ch.pause()
+    # rospy.sleep(0.05)
+    ch.ur_trajectory_publisher(pose=[1.4, -0.9, 0.7, -1.35, -1.6, 1.4])
+
     # ch.reset_sim()
     # ch.reset_env()
-    # ch.unpause()
+    ch.unpause()
     # ch.open_hand()
     # ch.change_physics()
 
-    while not rospy.is_shutdown():
-        # ch.open_hand()
-        # ch.close_fist()
-        ch.grip_single_joint(joint=3, angle=-1.05)
-        rospy.sleep(1)
-        ch.grip_single_joint(joint=3, angle=-0.07)
-        rospy.sleep(1)
-        #ch.ur_single_joint(joint=1, angle=-0.1)
-        #ch.ur_single_joint(joint=1, angle=0)
+    # while not rospy.is_shutdown():
+    # ch.open_hand()
+    # ch.close_fist()
+    # ch.grip_single_joint(joint=3, angle=-1.05)
+    # rospy.sleep(1)
+    # ch.grip_single_joint(joint=3, angle=-0.07)
+    # rospy.sleep(1)
+    # ch.ur_single_joint(joint=1, angle=-0.1)
+    # ch.ur_single_joint(joint=1, angle=0)
 
     # See __init__ for joint list (finger 1: 1 to 3, finger 2: 4 to 6, finger 3/middle: 7 to 9, palm: 10 to 11)
-    ch.grip_sinusoidal(joint=3, sec=0)
+    # ch.grip_sinusoidal(joint=3, sec=0)
 
-    #ch.ur_sinusoidal(joint=2, sec=0)
+    # ch.ur_sinusoidal(joint=2, sec=0)
 
 
 if __name__ == '__main__':
