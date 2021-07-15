@@ -31,7 +31,6 @@
   <arg name="ur_controller_config_file" default="$(find ur_gazebo)/config/ur10e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="3f_controller_config_file" default="$(find robotiq_3f_gripper_articulated_gazebo)/config/robotiq_3f_controller.yaml" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="controllers" default="ur_joint_state_controller eff_joint_traj_controller robotiq_joint_state_controller robotiq_3f_controller" doc="Controllers that are activated by default."/>
-  <arg name="stopped_controllers" default="joint_group_eff_controller" doc="Controllers that are initally loaded, but not started."/>
 
   <!-- robot_state_publisher configuration -->
   <arg name="tf_prefix" default="" doc="tf_prefix used for the robot."/>
@@ -144,7 +143,6 @@
     <arg name="spawn_mid_j3" value="$(arg spawn_mid_j3)"/>
     <arg name="spawn_palm_f1" value="$(arg spawn_palm_f1)"/>
     <arg name="spawn_palm_f2" value="$(arg spawn_palm_f2)"/>
-    <arg name="stopped_controllers" value="$(arg stopped_controllers)"/>
     <arg name="use_clock_frequency" value="$(arg use_clock_frequency)"/>
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="verbose" value="$(arg verbose)"/>
