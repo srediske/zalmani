@@ -1,19 +1,44 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="robot_description_file" default="$(find ur_robotiq_connector)/launch/inc/load_ur10e_with_2f.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
+
+  <!-- Declare global arguments -->
+  <arg name="prefix" default="" doc="Prefix for the complete robot."/>
+  <arg name="robot_description_file" default="$(find ur_robotiq_connector)/launch/inc/load_ur_with_2f85.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
+
+  <!-- Declare UR arguments -->
+  <arg name="ur_use_effort_controller" default="false" doc="If 'true' starts with effort controller, otherwise with position controller."/>
   <arg name="ur_joint_limit_params" default="$(find ur_description)/config/ur10e/joint_limits.yaml"/>
   <arg name="ur_kinematics_params" default="$(find ur_description)/config/ur10e/default_kinematics.yaml"/>
   <arg name="ur_physical_params" default="$(find ur_description)/config/ur10e/physical_parameters.yaml"/>
   <arg name="ur_visual_params" default="$(find ur_description)/config/ur10e/visual_parameters.yaml"/>
+  <arg name="ur_transmission_hw_interface" default="hardware_interface/EffortJointInterface" if="$(arg ur_use_effort_controller)"/>
+  <arg name="ur_transmission_hw_interface" default="hardware_interface/PositionJointInterface" unless="$(arg ur_use_effort_controller)"/>
+  <arg name="ur_controllers" default="joint_state_controller eff_joint_traj_controller" if="$(arg ur_use_effort_controller)"/>
+  <arg name="ur_controllers" default="joint_state_controller pos_joint_traj_controller" unless="$(arg ur_use_effort_controller)"/>
+  <arg name="ur_stopped_controllers" default="joint_group_eff_controller" if="$(arg ur_use_effort_controller)"/>
+  <arg name="ur_stopped_controllers" default="joint_group_pos_controller" unless="$(arg ur_use_effort_controller)"/>
+
+  <!-- Declare Robotiq arguments -->
+  <arg name="robotiq_use_effort_controller" default="true" doc="If 'true' starts with effort controller, otherwise with position controller."/>
+  <arg name="robotiq_joint_limit_params" default="$(find robotiq_2f_description)/config/2f-85/joint_limits.yaml"/>
+  <arg name="robotiq_physical_params" default="$(find robotiq_2f_description)/config/2f-85/physical_parameters.yaml"/>
+  <arg name="robotiq_visual_params" default="$(find robotiq_2f_description)/config/2f-85/visual_parameters.yaml"/>
+  <arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface" if="$(arg robotiq_use_effort_controller)"/>
+  <arg name="robotiq_transmission_hw_interface" default="hardware_interface/PositionJointInterface" unless="$(arg robotiq_use_effort_controller)"/>
+  <arg name="robotiq_controllers" default="robotiq_eff_joint_traj_controller" if="$(arg robotiq_use_effort_controller)"/>
+  <arg name="robotiq_controllers" default="robotiq_pos_joint_traj_controller" unless="$(arg robotiq_use_effort_controller)"/>
+  <arg name="robotiq_stopped_controllers" default="robotiq_joint_group_eff_controller" if="$(arg robotiq_use_effort_controller)"/>
+  <arg name="robotiq_stopped_controllers" default="robotiq_joint_group_pos_controller" unless="$(arg robotiq_use_effort_controller)"/>
 
   <!-- Controller configuration -->
   <arg name="ur_controller_config_file" default="$(find ur_gazebo)/config/ur10e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="2f_controller_config_file" default="$(find robotiq_2f_85_gripper_articulated_gazebo)/config/robotiq_2f_85_controller.yaml" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="controllers" default="ur_joint_state_controller eff_joint_traj_controller robotiq_joint_state_controller robotiq_2f_controller" doc="Controllers that are activated by default."/>
+  <arg name="robotiq_controller_config_file" default="$(find robotiq_gazebo)/config/2f85_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
+  <arg name="controllers" default="$(arg ur_controllers) $(arg robotiq_controllers)" doc="Controllers that are activated by default."/>
+  <arg name="stopped_controllers" default="$(arg ur_stopped_controllers) $(arg robotiq_stopped_controllers)" doc="Controllers that are initially loaded, but not started."/>
 
   <!-- robot_state_publisher configuration -->
   <arg name="tf_prefix" default="" doc="tf_prefix used for the robot."/>
-  <arg name="tf_pub_rate" default="50" doc="Rate at which robot_state_publisher should publish transforms."/>
+  <arg name="tf_pub_rate" default="500" doc="Rate at which robot_state_publisher should publish transforms."/>
 
   <!-- Gazebo parameters -->
   <arg name="debug" default="false" doc="Activates the debug mode."/>
@@ -42,6 +67,7 @@
   <arg name="spawn_R" default="0.0" doc="roll in radians."/>
   <arg name="spawn_P" default="0.0" doc="pitch in radians."/>
   <arg name="spawn_Y" default="0.0" doc="yaw in radians."/>
+
   <!-- UR: Initial joint positions in radians -->
   <arg name="spawn_shoulder_pan" default="0.0"/>
   <arg name="spawn_shoulder_lift" default="0.0"/>
@@ -49,9 +75,9 @@
   <arg name="spawn_wrist_1" default="0.0"/>
   <arg name="spawn_wrist_2" default="0.0"/>
   <arg name="spawn_wrist_3" default="0.0"/>
+
   <!-- Robotiq-2f: Initial joint positions in radians -->
   <arg name="spawn_finger_joint" default="0.0"/>
-
 
   <!-- Load urdf on the parameter server -->
   <include file="$(arg robot_description_file)">
@@ -59,6 +85,11 @@
     <arg name="ur_kinematics_params" value="$(arg ur_kinematics_params)"/>
     <arg name="ur_physical_params" value="$(arg ur_physical_params)"/>
     <arg name="ur_visual_params" value="$(arg ur_visual_params)"/>
+    <arg name="ur_transmission_hw_interface" value="$(arg ur_transmission_hw_interface)"/>
+    <arg name="robotiq_joint_limit_params" value="$(arg robotiq_joint_limit_params)"/>
+    <arg name="robotiq_physical_params" value="$(arg robotiq_physical_params)"/>
+    <arg name="robotiq_visual_params" value="$(arg robotiq_visual_params)"/>
+    <arg name="robotiq_transmission_hw_interface" value="$(arg robotiq_transmission_hw_interface)"/>
   </include>
 
   <!-- Robot state publisher -->
@@ -67,10 +98,14 @@
     <param name="tf_prefix" value="$(arg tf_prefix)" />
   </node>
 
+  <!-- Joint state publisher
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+    <param name="publish_frequency" type="double" value="$(arg tf_pub_rate)" />
+    <param name="tf_prefix" value="$(arg tf_prefix)" />
+  </node> -->
+
   <!-- Start the 'driver' (ie: Gazebo in this case) and the controller for UR AND Gripper -->
   <include file="$(dirname)/inc/controller_utils_2f.launch.xml">
-    <arg name="ur_controller_config_file" value="$(arg ur_controller_config_file)"/>
-    <arg name="2f_controller_config_file" value="$(arg 2f_controller_config_file)"/>
     <arg name="controllers" value="$(arg controllers)"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="enable_ros_network" value="$(arg enable_ros_network)"/>
@@ -83,6 +118,7 @@
     <arg name="pub_clock_frequency" value="$(arg pub_clock_frequency)"/>
     <arg name="recording" value="$(arg recording)"/>
     <arg name="respawn_gazebo" value="$(arg respawn_gazebo)"/>
+    <arg name="robotiq_controller_config_file" value="$(arg robotiq_controller_config_file)"/>
     <arg name="server_required" value="$(arg server_required)"/>
     <arg name="spawn_x" value="$(arg spawn_x)"/>
     <arg name="spawn_y" value="$(arg spawn_y)"/>
@@ -97,6 +133,8 @@
     <arg name="spawn_wrist_2" value="$(arg spawn_wrist_2)"/>
     <arg name="spawn_wrist_3" value="$(arg spawn_wrist_3)"/>
     <arg name="spawn_finger_joint" value="$(arg spawn_finger_joint)"/>
+    <arg name="stopped_controllers" value="$(arg stopped_controllers)"/>
+    <arg name="ur_controller_config_file" value="$(arg ur_controller_config_file)"/>
     <arg name="use_clock_frequency" value="$(arg use_clock_frequency)"/>
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="verbose" value="$(arg verbose)"/>

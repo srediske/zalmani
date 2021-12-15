@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <!-- Parameters we share with ur_robot_driver -->
+  <!-- Controller parameters -->
   <arg name="ur_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="robotiq_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="controllers" doc="Controllers that are activated by default."/>
