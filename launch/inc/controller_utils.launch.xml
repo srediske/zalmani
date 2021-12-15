@@ -1,24 +1,11 @@
 <?xml version="1.0"?>
 <launch>
-  <!--
-    This file 'pretends' to load a driver for a UR robot, by accepting similar
-    arguments and playing a similar role (ie: starting the driver node (in this
-    case Gazebo) and loading the ros_control controllers).
-
-    Some of the arguments to this .launch file will be familiar to those using
-    the ur_robot_driver with their robot.
-
-    Other parameters are specific to Gazebo.
-
-    Note: we spawn and start the ros_control controllers here, as they are,
-    together with gazebo_ros_control, essentially the replacement for the
-    driver which would be used with a real robot.
-  -->
 
   <!-- Parameters we share with ur_robot_driver -->
   <arg name="ur_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="3f_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="controllers" default="joint_state_controller eff_joint_traj_controller robotiq_joint_state_controller robotiq_3f_controller"/>
+  <arg name="robotiq_controller_config_file" doc="Config file used for defining the ROS-Control controllers."/>
+  <arg name="controllers" doc="Controllers that are activated by default."/>
+  <arg name="stopped_controllers" doc="Controllers that are initially loaded, but not started."/>
 
   <!-- Gazebo parameters -->
   <arg name="debug" default="false" doc="Activates the debug mode."/>
@@ -69,7 +56,7 @@
 
   <!-- Load controller settings -->
   <rosparam file="$(arg ur_controller_config_file)" command="load"/>
-  <rosparam file="$(arg 3f_controller_config_file)" command="load"/>
+  <rosparam file="$(arg robotiq_controller_config_file)" command="load"/>
 
   <!-- Start Gazebo and load the empty world if requested to do so -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg start_gazebo)">
@@ -95,7 +82,7 @@
 
   To initialize the joint positions, it's necessary to start the physics paused when the robot spawns.
   The '-unpause' option is important to let the joints snap into position and add the name of the robot,
-  in this case it's simply "robot".
+  in this case it's the argument: gazebo_model_name.
   -->
   <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model"
     args="
@@ -132,4 +119,7 @@
   <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
     args="$(arg controllers)" output="screen" respawn="false" />
 
+  <!-- Load other controllers, but do not start them. -->
+  <node name="ros_control_stopped_spawner" pkg="controller_manager" type="spawner"
+    args="--stopped $(arg stopped_controllers)" output="screen" respawn="false" />
 </launch>

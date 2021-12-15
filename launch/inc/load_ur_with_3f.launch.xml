@@ -1,36 +1,30 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- Load the top-level (ie: stand-alone and complete) xacro for the UR
-       variant defined by the set of yaml parameter files (so to load a UR5
-       onto the ROS parameter server, provide paths to the .yaml files which
-       contain the limits, kinematics, physical and visual parameters which
-       together describe a UR5 robot).
 
-       NOTE: users will typically want to use use one of the other .launch files
-       in this directory (ie: 'load_urXXX.launch'), as those already contain
-       appropriate default values for the required arguments for the various
-       supported robots.
+  <arg name="prefix" default=""/>
 
-       NOTE2: if you have a custom robot configuration, or your robot is
-       integrated into a work cell, do NOT change this file or add all of the
-       work cell objects to the ur.xacro file. Create a new top-level xacro and
-       include the ur_macro.xacro file into it. Then write a new .launch file
-       to load it onto the parameter server.
-  -->
-
-  <!--Parameter files -->
-  <arg name="ur_joint_limit_params" doc="YAML file containing the joint limit values"/>
+  <!-- UR parameter files -->
+  <arg name="ur_joint_limit_params" doc="YAML file containing the joint limit values of the arm."/>
   <arg name="ur_kinematics_params" doc="YAML file containing the robot's kinematic parameters. These will be different for each robot as they contain the robot's calibration."/>
-  <arg name="ur_physical_params" doc="YAML file containing the phycical parameters of the robots"/>
-  <arg name="ur_visual_params" doc="YAML file containing the visual model of the robots"/>
+  <arg name="ur_physical_params" doc="YAML file containing the physical parameters of the arm."/>
+  <arg name="ur_visual_params" doc="YAML file containing the visual model of the arm."/>
 
-  <!--Common parameters  -->
-  <arg name="ur_transmission_hw_interface" default="hardware_interface/EffortJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
+  <!-- UR parameters -->
+  <arg name="ur_transmission_hw_interface" default="hardware_interface/PositionJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
   <arg name="ur_safety_limits" default="false" doc="If True, enable the safety limits controller"/>
   <arg name="ur_safety_pos_margin" default="0.15" doc="The lower/upper limits in the safety controller" />
   <arg name="ur_safety_k_position" default="20" doc="Used to set k position in the safety controller" />
 
+  <!-- Robotiq parameter files -->
+  <arg name="robotiq_joint_limit_params" doc="YAML file containing the joint limit values of the end effector."/>
+  <arg name="robotiq_physical_params" doc="YAML file containing the physical parameters of the end effector."/>
+  <arg name="robotiq_visual_params" doc="YAML file containing the visual model of the end effector."/>
+
+  <!-- Robotiq parameters -->
+  <arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
+
   <param name="robot_description" command="$(find xacro)/xacro '$(find ur_robotiq_connector)/urdf/ur10e_3f-gripper.xacro'
+    prefix:=$(arg prefix)
     ur_joint_limit_params:=$(arg ur_joint_limit_params)
     ur_kinematics_params:=$(arg ur_kinematics_params)
     ur_physical_params:=$(arg ur_physical_params)
@@ -38,6 +32,10 @@
     ur_transmission_hw_interface:=$(arg ur_transmission_hw_interface)
     ur_safety_limits:=$(arg ur_safety_limits)
     ur_safety_pos_margin:=$(arg ur_safety_pos_margin)
-    ur_safety_k_position:=$(arg ur_safety_k_position)"
+    ur_safety_k_position:=$(arg ur_safety_k_position)
+    robotiq_transmission_hw_interface:=$(arg robotiq_transmission_hw_interface)
+    robotiq_joint_limit_params:=$(arg robotiq_joint_limit_params)
+    robotiq_physical_params:=$(arg robotiq_physical_params)
+    robotiq_visual_params:=$(arg robotiq_visual_params)"
     />
 </launch>
