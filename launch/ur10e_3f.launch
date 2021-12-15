@@ -115,7 +115,7 @@
   </node> -->
 
   <!-- Start the 'driver' (ie: Gazebo in this case) and the controller for UR AND Gripper -->
-  <include file="$(dirname)/inc/controller_utils.launch.xml">
+  <include file="$(dirname)/inc/controller_utils_3f.launch.xml">
     <arg name="controllers" value="$(arg controllers)"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="enable_ros_network" value="$(arg enable_ros_network)"/>
