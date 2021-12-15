@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur10e_3f-gripper">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur_3f_robot">
 
   <!-- Import main macro for UR & Robotiq 3f. -->
   <xacro:include filename="$(find ur_gazebo)/urdf/ur_macro.xacro"/>
