@@ -7,7 +7,7 @@
   </description>
   <maintainer email="stephan.rediske@zal.aero">Stephan Rediske</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <url type="website">https://www.zal.aero</url>
   <url type="repository">https://gitlab.zal.aero/aiara/ros/packages/ur_robotiq_connector</url>
