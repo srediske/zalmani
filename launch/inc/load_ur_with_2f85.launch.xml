@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="prefix" default=""/>
+
+  <!-- UR parameter files -->
+  <arg name="ur_joint_limit_params" doc="YAML file containing the joint limit values of the arm."/>
+  <arg name="ur_kinematics_params" doc="YAML file containing the robot's kinematic parameters. These will be different for each robot as they contain the robot's calibration."/>
+  <arg name="ur_physical_params" doc="YAML file containing the physical parameters of the arm."/>
+  <arg name="ur_visual_params" doc="YAML file containing the visual model of the arm."/>
+
+  <!-- UR parameters -->
+  <arg name="ur_transmission_hw_interface" default="hardware_interface/PositionJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
+  <arg name="ur_safety_limits" default="false" doc="If True, enable the safety limits controller"/>
+  <arg name="ur_safety_pos_margin" default="0.15" doc="The lower/upper limits in the safety controller" />
+  <arg name="ur_safety_k_position" default="20" doc="Used to set k position in the safety controller" />
+
+  <!-- Robotiq parameter files -->
+  <arg name="robotiq_joint_limit_params" doc="YAML file containing the joint limit values of the end effector."/>
+  <arg name="robotiq_physical_params" doc="YAML file containing the physical parameters of the end effector."/>
+  <arg name="robotiq_visual_params" doc="YAML file containing the visual model of the end effector."/>
+
+  <!-- Robotiq parameters -->
+  <arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ur_robotiq_connector)/urdf/ur_2f85.xacro'
+    prefix:=$(arg prefix)
+    ur_joint_limit_params:=$(arg ur_joint_limit_params)
+    ur_kinematics_params:=$(arg ur_kinematics_params)
+    ur_physical_params:=$(arg ur_physical_params)
+    ur_visual_params:=$(arg ur_visual_params)
+    ur_transmission_hw_interface:=$(arg ur_transmission_hw_interface)
+    ur_safety_limits:=$(arg ur_safety_limits)
+    ur_safety_pos_margin:=$(arg ur_safety_pos_margin)
+    ur_safety_k_position:=$(arg ur_safety_k_position)
+    robotiq_transmission_hw_interface:=$(arg robotiq_transmission_hw_interface)
+    robotiq_joint_limit_params:=$(arg robotiq_joint_limit_params)
+    robotiq_physical_params:=$(arg robotiq_physical_params)
+    robotiq_visual_params:=$(arg robotiq_visual_params)"
+    />
+</launch>

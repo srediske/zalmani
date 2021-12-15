@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur_3f_robot">
+
+  <!-- Import main macro for UR & Robotiq 3f. -->
+  <xacro:include filename="$(find ur_gazebo)/urdf/ur_macro.xacro"/>
+  <xacro:include filename="$(find robotiq_gazebo)/urdf/inc/robotiq_3f_macro.xacro"/>
+
+  <!-- Declare global arguments. -->
+  <xacro:arg name="prefix" default=""/>
+
+  <!-- Declare UR arguments. -->
+  <xacro:arg name="ur_joint_limit_params" default="(find ur_description)/config/ur10e/joint_limits.yaml"/>
+  <xacro:arg name="ur_kinematics_params" default="(find ur_description)/config/ur10e/default_kinematics.yaml"/>
+  <xacro:arg name="ur_physical_params" default="(find ur_description)/config/ur10e/physical_parameters.yaml"/>
+  <xacro:arg name="ur_visual_params" default="(find ur_description)/config/ur10e/visual_parameters.yaml"/>
+  <!--
+    legal values:
+      - hardware_interface/PositionJointInterface
+      - hardware_interface/VelocityJointInterface
+      - hardware_interface/EffortJointInterface
+
+    NOTE: this value must correspond to the controller configured in the
+          controller .yaml files in the 'config' directory.
+  -->
+  <xacro:arg name="ur_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="ur_safety_limits" default="false"/>
+  <xacro:arg name="ur_safety_pos_margin" default="0.15"/>
+  <xacro:arg name="ur_safety_k_position" default="20"/>
+
+  <!-- Declare Robotiq arguments. -->
+  <xacro:arg name="robotiq_joint_limit_params" default="$(find robotiq_3f_description)/config/joint_limits.yaml"/>
+  <xacro:arg name="robotiq_physical_params" default="$(find robotiq_3f_description)/config/physical_parameters.yaml"/>
+  <xacro:arg name="robotiq_visual_params" default="$(find robotiq_3f_description)/config/visual_parameters.yaml"/>
+  <!--
+    legal values:
+      - hardware_interface/PositionJointInterface
+      - hardware_interface/VelocityJointInterface
+      - hardware_interface/EffortJointInterface
+
+    NOTE: this value must correspond to the controller configured in the
+          controller .yaml files in the 'config' directory.
+  -->
+  <xacro:arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface"/>
+
+  <!-- Instantiate the UR robot and pass it all the required arguments. -->
+  <xacro:ur_robot_gazebo
+    prefix="$(arg prefix)"
+    joint_limits_parameters_file="$(arg ur_joint_limit_params)"
+    kinematics_parameters_file="$(arg ur_kinematics_params)"
+    physical_parameters_file="$(arg ur_physical_params)"
+    visual_parameters_file="$(arg ur_visual_params)"
+    transmission_hw_interface="$(arg ur_transmission_hw_interface)"
+    safety_limits="$(arg ur_safety_limits)"
+    safety_pos_margin="$(arg ur_safety_pos_margin)"
+    safety_k_position="$(arg ur_safety_k_position)"
+  />
+
+  <!-- Load the Gazebo standard parameter "world" and fix the base of the UR. -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <!-- Instantiate the Robotiq 3f and pass it all the required arguments. -->
+  <xacro:robotiq_3f_gazebo
+    prefix="$(arg prefix)"
+    joint_limits_parameters_file="$(arg robotiq_joint_limit_params)"
+    physical_parameters_file="$(arg robotiq_physical_params)"
+    visual_parameters_file="$(arg robotiq_visual_params)"
+    transmission_hw_interface="$(arg robotiq_transmission_hw_interface)"
+  />
+
+  <!-- Create a fixed joint to mount the Robotiq end effector to the UR. -->
+  <joint name="flange" type="fixed">
+    <parent link="tool0"/>
+    <child link="palm"/>
+    <origin xyz="0.0 0.0 0.045" rpy="${pi/2} 0.0 0.0"/>
+  </joint>
+
+  <!--
+    Inject Gazebo ROS Control plugin, which allows us to use ros_control
+    controllers to control the virtual robot hw.
+  -->
+  <gazebo>
+      <plugin name="ros_control" filename="libgazebo_ros_control.so">
+      <!--robotNamespace>/</robotNamespace-->
+      <!--robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType-->
+      </plugin>
+  </gazebo>
+</robot>
