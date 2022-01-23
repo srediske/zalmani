@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur16e_3f_robot">
+
+  <!-- Declare global arguments. -->
+  <xacro:arg name="prefix" default=""/>
+
+  <!-- Declare UR arguments. -->
+  <xacro:arg name="ur_joint_limit_params" default="$(find ur_description)/config/ur16e/joint_limits.yaml"/>
+  <xacro:arg name="ur_kinematics_params" default="$(find ur_description)/config/ur16e/default_kinematics.yaml"/>
+  <xacro:arg name="ur_physical_params" default="$(find ur_description)/config/ur16e/physical_parameters.yaml"/>
+  <xacro:arg name="ur_visual_params" default="$(find ur_description)/config/ur16e/visual_parameters.yaml"/>
+  <!--
+    legal values:
+      - hardware_interface/PositionJointInterface
+      - hardware_interface/VelocityJointInterface
+      - hardware_interface/EffortJointInterface
+
+    NOTE: this value must correspond to the controller configured in the
+          controller .yaml files in the 'config' directory.
+  -->
+  <xacro:arg name="ur_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="ur_safety_limits" default="false"/>
+  <xacro:arg name="ur_safety_pos_margin" default="0.15"/>
+  <xacro:arg name="ur_safety_k_position" default="20"/>
+
+  <!-- Declare Robotiq arguments. -->
+  <xacro:arg name="robotiq_joint_limit_params" default="$(find robotiq_3f_description)/config/joint_limits.yaml"/>
+  <xacro:arg name="robotiq_physical_params" default="$(find robotiq_3f_description)/config/physical_parameters.yaml"/>
+  <xacro:arg name="robotiq_visual_params" default="$(find robotiq_3f_description)/config/visual_parameters.yaml"/>
+  <!--
+    legal values:
+      - hardware_interface/PositionJointInterface
+      - hardware_interface/VelocityJointInterface
+      - hardware_interface/EffortJointInterface
+
+    NOTE: this value must correspond to the controller configured in the
+          controller .yaml files in the 'config' directory.
+  -->
+  <xacro:arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface"/>
+
+  <!-- Import main macro. -->
+  <xacro:include filename="$(find zalmani_description)/urdf/inc/ur_3f_macro.xacro"/>
+
+  <!-- Instantiate the robot. -->
+  <xacro:ur_3f_assembler
+    prefix="$(arg prefix)"
+    ur_joint_limit_params="$(arg ur_joint_limit_params)"
+    ur_kinematics_params="$(arg ur_kinematics_params)"
+    ur_physical_params="$(arg ur_physical_params)"
+    ur_visual_params="$(arg ur_visual_params)"
+    ur_transmission_hw_interface="$(arg ur_transmission_hw_interface)"
+    ur_safety_limits="$(arg ur_safety_limits)"
+    ur_safety_pos_margin="$(arg ur_safety_pos_margin)"
+    ur_safety_k_position="$(arg ur_safety_k_position)"
+    robotiq_joint_limit_params="$(arg robotiq_joint_limit_params)"
+    robotiq_physical_params="$(arg robotiq_physical_params)"
+    robotiq_visual_params="$(arg robotiq_visual_params)"
+    robotiq_transmission_hw_interface="$(arg robotiq_transmission_hw_interface)"
+  />
+</robot>

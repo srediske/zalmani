@@ -3,7 +3,7 @@
 
   <!-- Declare global arguments -->
   <arg name="prefix" default="" doc="Prefix for the complete robot."/>
-  <arg name="robot_description_file" default="$(find ur_robotiq_connector)/launch/inc/load_ur_with_3f.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
+  <arg name="robot_description_file" default="$(dirname)/inc/load_ur_with_2f85.launch.xml" doc="Launch file which populates the 'robot_description' parameter."/>
 
   <!-- Declare UR arguments -->
   <arg name="ur_use_effort_controller" default="false" doc="If 'true' starts with effort controller, otherwise with position controller."/>
@@ -20,9 +20,9 @@
 
   <!-- Declare Robotiq arguments -->
   <arg name="robotiq_use_effort_controller" default="true" doc="If 'true' starts with effort controller, otherwise with position controller."/>
-  <arg name="robotiq_joint_limit_params" default="$(find robotiq_3f_description)/config/joint_limits.yaml"/>
-  <arg name="robotiq_physical_params" default="$(find robotiq_3f_description)/config/physical_parameters.yaml"/>
-  <arg name="robotiq_visual_params" default="$(find robotiq_3f_description)/config/visual_parameters.yaml"/>
+  <arg name="robotiq_joint_limit_params" default="$(find robotiq_2f_description)/config/2f-85/joint_limits.yaml"/>
+  <arg name="robotiq_physical_params" default="$(find robotiq_2f_description)/config/2f-85/physical_parameters.yaml"/>
+  <arg name="robotiq_visual_params" default="$(find robotiq_2f_description)/config/2f-85/visual_parameters.yaml"/>
   <arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface" if="$(arg robotiq_use_effort_controller)"/>
   <arg name="robotiq_transmission_hw_interface" default="hardware_interface/PositionJointInterface" unless="$(arg robotiq_use_effort_controller)"/>
   <arg name="robotiq_controllers" default="robotiq_eff_joint_traj_controller" if="$(arg robotiq_use_effort_controller)"/>
@@ -32,7 +32,7 @@
 
   <!-- Controller configuration -->
   <arg name="ur_controller_config_file" default="$(find ur_gazebo)/config/ur10e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
-  <arg name="robotiq_controller_config_file" default="$(find robotiq_gazebo)/config/3f_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
+  <arg name="robotiq_controller_config_file" default="$(find robotiq_gazebo)/config/2f85_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
   <arg name="controllers" default="$(arg ur_controllers) $(arg robotiq_controllers)" doc="Controllers that are activated by default."/>
   <arg name="stopped_controllers" default="$(arg ur_stopped_controllers) $(arg robotiq_stopped_controllers)" doc="Controllers that are initially loaded, but not started."/>
 
@@ -76,18 +76,8 @@
   <arg name="spawn_wrist_2" default="0.0"/>
   <arg name="spawn_wrist_3" default="0.0"/>
 
-  <!-- Robotiq-3f: Initial joint positions in radians -->
-  <arg name="spawn_f1_j1" default="0.0"/>
-  <arg name="spawn_f1_j2" default="0.0"/>
-  <arg name="spawn_f1_j3" default="0.0"/>
-  <arg name="spawn_f2_j1" default="0.0"/>
-  <arg name="spawn_f2_j2" default="0.0"/>
-  <arg name="spawn_f2_j3" default="0.0"/>
-  <arg name="spawn_mid_j1" default="0.0"/>
-  <arg name="spawn_mid_j2" default="0.0"/>
-  <arg name="spawn_mid_j3" default="0.0"/>
-  <arg name="spawn_palm_f1" default="0.0"/>
-  <arg name="spawn_palm_f2" default="0.0"/>
+  <!-- Robotiq-2f: Initial joint positions in radians -->
+  <arg name="spawn_finger_joint" default="0.0"/>
 
   <!-- Load urdf on the parameter server -->
   <include file="$(arg robot_description_file)">
@@ -115,7 +105,7 @@
   </node> -->
 
   <!-- Start the 'driver' (ie: Gazebo in this case) and the controller for UR AND Gripper -->
-  <include file="$(dirname)/inc/controller_utils_3f.launch.xml">
+  <include file="$(dirname)/inc/controller_utils_2f.launch.xml">
     <arg name="controllers" value="$(arg controllers)"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="enable_ros_network" value="$(arg enable_ros_network)"/>
@@ -142,17 +132,7 @@
     <arg name="spawn_wrist_1" value="$(arg spawn_wrist_1)"/>
     <arg name="spawn_wrist_2" value="$(arg spawn_wrist_2)"/>
     <arg name="spawn_wrist_3" value="$(arg spawn_wrist_3)"/>
-    <arg name="spawn_f1_j1" value="$(arg spawn_f1_j1)"/>
-    <arg name="spawn_f1_j2" value="$(arg spawn_f1_j2)"/>
-    <arg name="spawn_f1_j3" value="$(arg spawn_f1_j3)"/>
-    <arg name="spawn_f2_j1" value="$(arg spawn_f2_j1)"/>
-    <arg name="spawn_f2_j2" value="$(arg spawn_f2_j2)"/>
-    <arg name="spawn_f2_j3" value="$(arg spawn_f2_j3)"/>
-    <arg name="spawn_mid_j1" value="$(arg spawn_mid_j1)"/>
-    <arg name="spawn_mid_j2" value="$(arg spawn_mid_j2)"/>
-    <arg name="spawn_mid_j3" value="$(arg spawn_mid_j3)"/>
-    <arg name="spawn_palm_f1" value="$(arg spawn_palm_f1)"/>
-    <arg name="spawn_palm_f2" value="$(arg spawn_palm_f2)"/>
+    <arg name="spawn_finger_joint" value="$(arg spawn_finger_joint)"/>
     <arg name="stopped_controllers" value="$(arg stopped_controllers)"/>
     <arg name="ur_controller_config_file" value="$(arg ur_controller_config_file)"/>
     <arg name="use_clock_frequency" value="$(arg use_clock_frequency)"/>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>zalmani_description</name>
+  <version>1.0.0</version>
+  <description>
+    URDF descriptions for Universal Robots arms with Robotiq end effectors.
+  </description>
+
+  <author>Stephan Rediske</author>
+  <maintainer email="stephan.rediske@zal.aero">Stephan Rediske</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://zal.aero/</url>
+  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>robotiq_2f_description</exec_depend>
+  <exec_depend>robotiq_3f_description</exec_depend>
+  <exec_depend>ur_description</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>zalmani_gazebo</exec_depend>
+
+  <export>
+  </export>
+</package>

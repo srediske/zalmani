@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur_3f_robot">
 
-  <!-- Import main macro for UR & Robotiq 3f. -->
+  <!-- Import main macro for UR. -->
   <xacro:include filename="$(find ur_gazebo)/urdf/ur_macro.xacro"/>
-  <xacro:include filename="$(find robotiq_gazebo)/urdf/inc/robotiq_3f_macro.xacro"/>
 
   <!-- Declare global arguments. -->
   <xacro:arg name="prefix" default=""/>
@@ -62,6 +61,9 @@
     <child link="base_link"/>
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
+
+  <!-- Import main macro for Robotiq 3f. -->
+  <xacro:include filename="$(find robotiq_gazebo)/urdf/inc/robotiq_3f_macro.xacro"/>
 
   <!-- Instantiate the Robotiq 3f and pass it all the required arguments. -->
   <xacro:robotiq_3f_gazebo

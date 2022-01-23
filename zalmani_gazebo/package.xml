@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ur_robotiq_connector</name>
+  <name>zalmani_gazebo</name>
   <version>1.0.0</version>
   <description>
-      Connector package for Universal Robot arms and Robotiq end-effectors.
+    Gazebo wrapper for Universal Robots arms with Robotiq end effectors.
   </description>
 
   <author>Stephan Rediske</author>
@@ -11,10 +11,11 @@
 
   <license>BSD</license>
 
-  <url type="website">https://www.zal.aero</url>
-  <url type="repository">https://gitlab.zal.aero/stephan.rediske/ur_robotiq_connector</url>
+  <url type="website">https://zal.aero/</url>
+  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani_gazebo</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <test_depend>roslaunch</test_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>effort_controllers</exec_depend>
@@ -30,4 +31,6 @@
   <exec_depend>ur_description</exec_depend>
   <exec_depend>ur_gazebo</exec_depend>
 
+  <export>
+  </export>
 </package>
