@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:macro name="ur_2f_assembler" params="
+    prefix
+    ur_joint_limit_params
+    ur_kinematics_params
+    ur_physical_params
+    ur_visual_params
+    ur_transmission_hw_interface
+    ur_safety_limits
+    ur_safety_pos_margin
+    ur_safety_k_position
+    robotiq_joint_limit_params
+    robotiq_physical_params
+    robotiq_visual_params
+    robotiq_transmission_hw_interface"
+  >
+    <!-- Import main macro for UR. -->
+    <xacro:include filename="$(find ur_description)/urdf/inc/ur_macro.xacro"/>
+
+    <!-- Instantiate the UR robot. -->
+    <xacro:ur_robot
+    prefix="$(arg prefix)"
+    joint_limits_parameters_file="$(arg ur_joint_limit_params)"
+    kinematics_parameters_file="$(arg ur_kinematics_params)"
+    physical_parameters_file="$(arg ur_physical_params)"
+    visual_parameters_file="$(arg ur_visual_params)"
+    transmission_hw_interface="$(arg ur_transmission_hw_interface)"
+    safety_limits="$(arg ur_safety_limits)"
+    safety_pos_margin="$(arg ur_safety_pos_margin)"
+    safety_k_position="$(arg ur_safety_k_position)"
+    />
+
+    <!-- Load the Gazebo standard parameter "world" and fix the base of the UR. -->
+    <link name="world"/>
+    <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </joint>
+
+    <!-- Import main macro for Robotiq 2f. -->
+    <xacro:include filename="$(find robotiq_2f_description)/urdf/inc/robotiq_2f_macro.xacro"/>
+
+    <!-- Instantiate the Robotiq 2f and pass it all the required arguments. -->
+    <xacro:robotiq_2f_assembler
+    prefix="$(arg prefix)"
+    joint_limits_parameters_file="$(arg robotiq_joint_limit_params)"
+    physical_parameters_file="$(arg robotiq_physical_params)"
+    visual_parameters_file="$(arg robotiq_visual_params)"
+    transmission_hw_interface="$(arg robotiq_transmission_hw_interface)"
+    />
+
+    <!-- Create a fixed joint to mount the Robotiq end effector to the UR. -->
+    <joint name="flange" type="fixed">
+    <parent link="tool0"/>
+    <child link="palm"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+    </joint>
+  </xacro:macro>
+</robot>

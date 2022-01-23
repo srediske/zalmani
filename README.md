@@ -1,8 +1,7 @@
-# ur_robotiq_connector
+# ZAL manipulators
 
 This package connects the Robotiq end effectors *3-Finger Adaptive Robot
-Gripper* and *2-Finger 2F-85 Gripper* with Universal Robot arms for simulation in
-Gazebo.
+Gripper* and *2-Finger 2F-85 Gripper* with Universal Robot arms.
 
 ## Installation
 
@@ -29,7 +28,7 @@ source /opt/ros/noetic/setup.bash
 mkdir -p catkin_ws/src && cd catkin_ws
 
 # clone the repository
-git clone https://gitlab.zal.aero/stephan.rediske/ur_robotiq_connector
+git clone https://gitlab.zal.aero/stephan.rediske/zalmani
 
 # install dependencies
 sudo apt update
@@ -47,7 +46,7 @@ source devel/setup.bash
 
 To start the simulation, run one of the top-level launch files, e.g.:
 
-    roslaunch ur_robotiq_connector ur10e_3f.launch
+    roslaunch zalmani_gazebo ur10e_3f.launch
 
 #### Note
 
@@ -67,7 +66,7 @@ files.
 
 For example:
 
-    roslaunch ur_robotiq_connector ur10e_3f.launch ur_use_effort_controller:=true robotiq_use_effort_controller:=false spawn_z:=1.0
+    roslaunch zalmani_gazebo ur10e_3f.launch ur_use_effort_controller:=true robotiq_use_effort_controller:=false spawn_z:=1.0
 
 spawns the UR10e with effort interface and
 Robotiq 3-Finger Adaptive Robot Gripper with position interface,

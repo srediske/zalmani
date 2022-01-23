@@ -23,7 +23,7 @@
   <!-- Robotiq parameters -->
   <arg name="robotiq_transmission_hw_interface" default="hardware_interface/EffortJointInterface" doc="The hardware_interface to expose for each joint in the simulated robot (one of: [PositionJointInterface, VelocityJointInterface, EffortJointInterface])"/>
 
-  <param name="robot_description" command="$(find xacro)/xacro '$(find ur_robotiq_connector)/urdf/ur_2f85.xacro'
+  <param name="robot_description" command="$(find xacro)/xacro '$(find zalmani_gazebo)/urdf/ur_3f.xacro'
     prefix:=$(arg prefix)
     ur_joint_limit_params:=$(arg ur_joint_limit_params)
     ur_kinematics_params:=$(arg ur_kinematics_params)
