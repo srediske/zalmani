@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>zalmani</name>
+  <name>zalmani_commander</name>
   <version>1.0.0</version>
   <description>
-    Support and wrapper for manipulators used by ZAL (metapackage).
+    Python modules for creating ActionClients to control the robots via the rospy ActionServer.
   </description>
 
   <author>Stephan Rediske</author>
@@ -12,15 +12,13 @@
   <license>BSD</license>
 
   <url type="website">https://zal.aero/</url>
-  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani</url>
+  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani_commander</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <exec_depend>zalmani_commander</exec_depend>
-  <exec_depend>zalmani_description</exec_depend>
-  <exec_depend>zalmani_gazebo</exec_depend>
+  <buildtool_depend>python3-catkin-pkg</buildtool_depend>
+
+  <exec_depend>rospy</exec_depend>
 
   <export>
-    <metapackage/>
-    <architecture_independent/>
   </export>
 </package>
