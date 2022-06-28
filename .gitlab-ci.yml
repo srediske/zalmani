@@ -1,11 +1,10 @@
 stages:
-  - .pre
   - build
   - lint
 
 variables:
-  APT_CACHE_DIR: $CI_PROJECT_DIR/.cache/apt
-  CATKIN_DIR: $CI_PROJECT_DIR/catkin
+  APT_CACHE_DIR: ${CI_PROJECT_DIR}/.cache/apt
+  CATKIN_DIR: ${CI_PROJECT_DIR}/catkin
   SECOND_REPO_PATH: stephan.rediske/universal_robot
   THIRD_REPO_PATH: stephan.rediske/robotiq
 
@@ -32,11 +31,11 @@ install dependencies:
     - echo -e "APT::Archives::MaxAge "'"7"'";\nAPT::Archives::MinAge "'"2"'";\nAPT::Archives::MaxSize "'"2000"'";\nDir::Cache::Archives "'"'"$APT_CACHE_DIR"'"'";" >> /etc/apt/apt.conf.d/20archive
     - rm -rf catkin
     - shopt -s extglob
-    - mkdir $CI_PROJECT_NAME && mv !(catkin|apt|$CI_PROJECT_NAME) $CI_PROJECT_NAME
-    - git clone $(echo $CI_REPOSITORY_URL | sed -e s"|$CI_PROJECT_PATH|$SECOND_REPO_PATH|")
-    - git clone $(echo $CI_REPOSITORY_URL | sed -e s"|$CI_PROJECT_PATH|$THIRD_REPO_PATH|")
-    - mkdir -p $CATKIN_DIR/src && mv !(catkin|apt) $CATKIN_DIR/src
-    - mkdir -p $APT_CACHE_DIR ; mv /var/cache/apt/archives/* $APT_CACHE_DIR -f
+    - mkdir ${CI_PROJECT_NAME} && mv !(catkin|apt|${CI_PROJECT_NAME}) ${CI_PROJECT_NAME}
+    - git clone $(echo ${CI_REPOSITORY_URL} | sed -e s"|${CI_PROJECT_PATH}|${SECOND_REPO_PATH}|")
+    - git clone $(echo ${CI_REPOSITORY_URL} | sed -e s"|${CI_PROJECT_PATH}|${THIRD_REPO_PATH}|")
+    - mkdir -p ${CATKIN_DIR}/src && mv !(catkin|apt) ${CATKIN_DIR}/src
+    - mkdir -p ${APT_CACHE_DIR} ; mv /var/cache/apt/archives/* ${APT_CACHE_DIR} -f
     - apt-get update
     - apt-get install -y catkin-lint
   script:
@@ -45,21 +44,21 @@ install dependencies:
   after_script:
     - shopt -s extglob
 
+catkin build:
+  stage: build
+  script:
+    - catkin config --init --extend /opt/ros/noetic --workspace catkin
+    - catkin build --summarize --no-status --force-color --workspace catkin
+
 catkin lint:
   stage: lint
   allow_failure: true
   script:
     - source catkin/devel/setup.bash
-    - catkin_lint -W2 catkin/src/$CI_PROJECT_NAME | tee catkin_lint.txt
+    - catkin_lint -W2 catkin/src/${CI_PROJECT_NAME} | tee catkin_lint.txt
   artifacts:
     name: catkin_lint
     when: always
     paths:
       - catkin_lint.txt
     expire_in: 1 week
-
-catkin build:
-  stage: build
-  script:
-    - catkin config --init --extend /opt/ros/noetic --workspace catkin
-    - catkin build --summarize --no-status --force-color --workspace catkin
