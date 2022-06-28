@@ -19,10 +19,10 @@ default:
       - catkin/
   before_script:
     - rm -f /etc/apt/apt.conf.d/docker-clean
-    - echo -e "APT::Archives::MaxAge "'"7"'";\nAPT::Archives::MinAge "'"2"'";\nAPT::Archives::MaxSize "'"2000"'";\nDir::Cache::Archives "'"'"$APT_CACHE_DIR"'"'";" >> /etc/apt/apt.conf.d/20archive
+    - echo -e "APT::Archives::MaxAge "'"7"'";\nAPT::Archives::MinAge "'"2"'";\nAPT::Archives::MaxSize "'"2000"'";\nDir::Cache::Archives "'"'"${APT_CACHE_DIR}"'"'";" >> /etc/apt/apt.conf.d/20archive
     - mkdir -p ${APT_CACHE_DIR}
-    - dpkg --force-all -i $APT_CACHE_DIR/*.deb
-    - apt-get install -f
+    - dpkg --force-all -i ${APT_CACHE_DIR}/*.deb
+    - apt-get install -f -y
 
 install dependencies:
   stage: .pre
