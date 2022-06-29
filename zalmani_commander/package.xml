@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>zalmani_commander</name>
+  <version>1.0.0</version>
+  <description>
+    Python modules for creating ActionClients to control the robots via the rospy ActionServer.
+  </description>
+
+  <author>Stephan Rediske</author>
+  <maintainer email="stephan.rediske@zal.aero">Stephan Rediske</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://zal.aero/</url>
+  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani_commander</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>python3-catkin-pkg</buildtool_depend>
+  <buildtool_depend>actionlib_msgs</buildtool_depend>
+  <buildtool_depend>controller_manager_msgs</buildtool_depend>
+  <buildtool_depend>control_msgs</buildtool_depend>
+  <buildtool_depend>trajectory_msgs</buildtool_depend>
+
+  <exec_depend>effort_controllers</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros_control</exec_depend>
+  <exec_depend>joint_state_controller</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>zalmani_gazebo</exec_depend>
+
+  <depend>actionlib</depend>
+  <depend>rospy</depend>
+
+  <export>
+  </export>
+</package>
