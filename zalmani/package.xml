@@ -15,6 +15,7 @@
   <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>zalmani_commander</exec_depend>
   <exec_depend>zalmani_description</exec_depend>
   <exec_depend>zalmani_gazebo</exec_depend>
 
