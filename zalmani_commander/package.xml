@@ -12,7 +12,7 @@
   <license>BSD</license>
 
   <url type="website">https://zal.aero/</url>
-  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani_commander</url>
+  <url type="repository">https://github.com/srediske/zalmani_commander</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>python3-catkin-pkg</buildtool_depend>

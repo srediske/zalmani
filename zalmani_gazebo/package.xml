@@ -12,7 +12,7 @@
   <license>BSD</license>
 
   <url type="website">https://zal.aero/</url>
-  <url type="repository">https://gitlab.zal.aero/stephan.rediske/zalmani_gazebo</url>
+  <url type="repository">https://github.com/srediske/zalmani_gazebo</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
